@@ -1,0 +1,27 @@
+# Node.js
+node_modules/
+backend/.env
+
+
+npm-debug.log*
+
+# Dependency directories
+pids
+.env
+
+*.pid
+*.seed
+.nyc_output
+coverage
+
+manifest
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+deployment.yaml
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history

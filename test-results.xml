@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="0.634" tests="3" failures="0">
+  <testsuite name="Root Suite" timestamp="2025-02-17T13:11:11" tests="0" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="Goals API Suite" timestamp="2025-02-17T13:11:11" tests="0" file="C:\Users\laksh\Pictures\backend\prommbackend\app-test.js" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="GET /goals" timestamp="2025-02-17T13:11:11" tests="1" file="C:\Users\laksh\Pictures\backend\prommbackend\app-test.js" time="0.514" failures="0">
+    <testcase name="Goals API Suite GET /goals it should fetch all goals (initially empty)" time="0.063" classname="it should fetch all goals (initially empty)">
+    </testcase>
+  </testsuite>
+  <testsuite name="POST /goals" timestamp="2025-02-17T13:11:12" tests="2" file="C:\Users\laksh\Pictures\backend\prommbackend\app-test.js" time="0.112" failures="0">
+    <testcase name="Goals API Suite POST /goals it should create a new goal" time="0.051" classname="it should create a new goal">
+    </testcase>
+    <testcase name="Goals API Suite POST /goals it should not create a goal without text" time="0.004" classname="it should not create a goal without text">
+    </testcase>
+  </testsuite>
+</testsuites>

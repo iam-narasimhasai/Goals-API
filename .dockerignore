@@ -1,0 +1,15 @@
+Dockerfile.prod
+.env
+Dockerfile
+Dockerfile.npr
+Jenkinsfile
+test-results.xml
+manifest/*
+manifest
+coverage
+owasp-report
+.nyc_output
+node_modules
+.gitignore
+.git
+deployment.yaml
