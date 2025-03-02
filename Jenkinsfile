@@ -158,7 +158,7 @@ pipeline {
                 allowMissing: true,
                 alwaysLinkToLastBuild: true,
                 keepAll: true,
-                reportDir: 'backend/coverage/lcov-report',
+                reportDir: 'coverage/lcov-report',
                 reportFiles: 'index.html',
                 reportName: 'Code Coverage HTML Report',
                 useWrapperFileDirectly: true
