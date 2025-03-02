@@ -26,7 +26,7 @@ pipeline {
         
         stage('OWASP Dependency Check') {
             steps {
-                dependencyCheck additionalArguments: '--scan / --out owasp-report --disableYarnAudit --prettyPrint --format ALL', 
+                dependencyCheck additionalArguments: '--scan . --out owasp-report --disableYarnAudit --prettyPrint --format ALL', 
                                 nvdCredentialsId: 'NVD-API-KEY', 
                                 odcInstallation: 'OWASP-DepCheck-12'
 
@@ -64,8 +64,9 @@ pipeline {
                                 -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
                         '''
                     }
-                    waitForQualityGate(abortPipeline: true)
+                 
                 }
+                waitForQualityGate(abortPipeline: true)
             }
         }
         
@@ -89,7 +90,7 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                withDockerRegistry(credentialsId: 'docker-creds', url: "") {
+                withDockerRegistry(credentialsId: 'dockerhub-creds', url: "") {
                     sh 'docker push narasimhasai95/goalsapi:${GIT_COMMIT}'
                 }
             }
@@ -131,7 +132,7 @@ pipeline {
                 allowMissing: true, 
                 alwaysLinkToLastBuild: true, 
                 keepAll: true, 
-                reportDir: 'backend/owasp-report', 
+                reportDir: 'owasp-report', 
                 reportFiles: 'dependency-check-jenkins.html', 
                 reportName: 'Dependency HTML Report', 
                 useWrapperFileDirectly: true
