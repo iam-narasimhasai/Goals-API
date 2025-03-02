@@ -15,24 +15,19 @@ pipeline {
     }
 
     stages {
-
         stage('Installing Dependencies') {
             options { timestamps() }
             steps {
-                sh ' npm install '
+                sh 'npm install'
             }
         }
 
-        
         stage('OWASP Dependency Check') {
             steps {
-                sh 'mkdir -p owasp-report' 
-                dependencyCheck additionalArguments: '--scan . --out ./owasp-report --disableYarnAudit --prettyPrint --format ALL', 
-                                nvdCredentialsId: 'NVD-API-KEY', 
+                sh 'mkdir -p owasp-report'
+                dependencyCheck additionalArguments: '--scan . --out ./owasp-report --disableYarnAudit --prettyPrint --format ALL',
+                                nvdCredentialsId: 'NVD-API-KEY',
                                 odcInstallation: 'OWASP-DepCheck-12'
-
-                // Uncomment to publish results and fail the build for critical vulnerabilities
-                // dependencyCheckPublisher failedTotalCritical: 1, pattern: 'backend/owasp-report/dependency-check-report.xml', stopBuild: true
             }
         }
 
@@ -47,7 +42,6 @@ pipeline {
             steps {
                 catchError(message: 'Oops! it will be fixed in future', stageResult: 'UNSTABLE') {
                     sh 'npm run coverage'
-
                 }
             }
         }
@@ -65,18 +59,14 @@ pipeline {
                                 -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
                         '''
                     }
-                 
                 }
                 waitForQualityGate(abortPipeline: true)
             }
         }
-        
 
         stage('Build Docker Image') {
             steps {
-                sh '''
-                    docker build -t narasimhasai95/goalsapi:${GIT_COMMIT} .
-                '''
+                sh 'docker build -t narasimhasai95/goalsapi:${GIT_COMMIT} .'
             }
         }
 
@@ -84,7 +74,9 @@ pipeline {
             steps {
                 sh '''
                     mkdir -p trivy-report
-                    trivy image --severity CRITICAL,HIGH,MEDIUM --format template --template "@/var/lib/jenkins/html.tpl" -o trivy-report/vulnerability-report.html narasimhasai95/goalsapi:${GIT_COMMIT}
+                    trivy image --severity CRITICAL,HIGH,MEDIUM --format template \
+                        --template "@/var/lib/jenkins/html.tpl" -o trivy-report/vulnerability-report.html \
+                        narasimhasai95/goalsapi:${GIT_COMMIT}
                 '''
             }
         }
@@ -96,7 +88,8 @@ pipeline {
                 }
             }
         }
-/*
+
+        /*
         stage('Deploy to Kubernetes') {
             steps {
                 sh 'git clone -b main https://github.com/iam-narasimhasai/GoalsApp_Manifest'
@@ -116,9 +109,29 @@ pipeline {
                 }
             }
         }
+        */
 
-*/
+        stage('Upload - AWS S3') {
+            steps {
+                withAWS(credentials: 'aws-creds', region: 'us-east-1') {  
+                    sh '''
+                        ls -ltr
+                        mkdir reports-${BUILD_ID}
+                        cp -rf coverage/ reports-${BUILD_ID}/
+                        cp -rf owasp-report/ reports-${BUILD_ID}/
+                        cp -rf trivy-report/ reports-${BUILD_ID}/
+                        cp test-results.xml reports-${BUILD_ID}/
+                        ls -ltr reports-${BUILD_ID}/
+                    '''
 
+                    s3Upload(
+                        file: "reports-${BUILD_ID}",
+                        bucket: 'goalsapi-jenkins-reports-bucket',
+                        path: "jenkins-${BUILD_ID}/"
+                    )
+                }
+            }
+        }
     }
 
     post {
@@ -128,7 +141,7 @@ pipeline {
                     sh 'rm -rf GoalsApp_Manifest'
                 }
             }
-            
+
             publishHTML([
                 allowMissing: true, 
                 alwaysLinkToLastBuild: true, 
@@ -160,8 +173,6 @@ pipeline {
                 reportName: 'Trivy Vulnerability Report',
                 useWrapperFileDirectly: true
             ])
-
         }
     }
-    
 }
