@@ -26,7 +26,7 @@ pipeline {
         
         stage('OWASP Dependency Check') {
             steps {
-                sh 'mkdir -p owasp-report'
+
                 dependencyCheck additionalArguments: '--scan . --out /owasp-report --disableYarnAudit --prettyPrint --format ALL', 
                                 nvdCredentialsId: 'NVD-API-KEY', 
                                 odcInstallation: 'OWASP-DepCheck-12'
