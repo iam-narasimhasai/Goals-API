@@ -4,7 +4,7 @@ pipeline {
         nodejs 'nodejs-18-20-6'
     }
     environment {
-        MONGOURI = "mongodb+srv://sai:secret32412@cluster0.awxhn.mongodb.net/course-goals?retryWrites=true&w=majority"
+        MONGO_URL = "mongodb+srv://sai:secret32412@cluster0.awxhn.mongodb.net/course-goals?retryWrites=true&w=majority"
         GIT_TOKEN = credentials('githubtoken')
         SONAR_SCANNER_HOME = tool 'sonarqube-scanner-7'
     }
