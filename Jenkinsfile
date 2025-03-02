@@ -6,6 +6,7 @@ pipeline {
     environment {
         MONGOURI = "mongodb+srv://sai:secret32412@cluster0.awxhn.mongodb.net/course-goals?retryWrites=true&w=majority"
         GIT_TOKEN = credentials('githubtoken')
+        SONAR_SCANNER_HOME = tool 'sonarqube-scanner-7'
     }
 
     options {
@@ -14,26 +15,18 @@ pipeline {
     }
 
     stages {
-        // stage('Git Checkout') {
-        //     steps {
-        //         git branch: 'pre-prod', url: 'https://github.com/iam-narasimhasai/GoalsApp'
-        //     }
-        // }
 
         stage('Installing Dependencies') {
             options { timestamps() }
             steps {
-                sh '''
-                    cd backend
-                    npm install
-                '''
+                sh ' npm install '
             }
         }
 
         
         stage('OWASP Dependency Check') {
             steps {
-                dependencyCheck additionalArguments: '--scan backend/ --out backend/owasp-report --disableYarnAudit --prettyPrint --format ALL', 
+                dependencyCheck additionalArguments: '--scan / --out owasp-report --disableYarnAudit --prettyPrint --format ALL', 
                                 nvdCredentialsId: 'NVD-API-KEY', 
                                 odcInstallation: 'OWASP-DepCheck-12'
 
@@ -45,20 +38,15 @@ pipeline {
         stage('Run Unit Testing') {
             options { retry(3) }
             steps {
-                sh '''
-                    cd backend
-                    npm run test
-                '''
+                sh 'npm run test'
             }
         }
 
         stage('Code Coverage') {
             steps {
                 catchError(message: 'Oops! it will be fixed in future', stageResult: 'UNSTABLE') {
-                    sh '''
-                        cd backend
-                        npm run coverage
-                    '''
+                    sh 'npm run coverage'
+
                 }
             }
         }
@@ -68,7 +56,6 @@ pipeline {
                 timeout(time: 60, unit: 'SECONDS') {
                     withSonarQubeEnv('sonar-qube-server') {
                         sh '''
-                            cd backend
                             echo $SONAR_SCANNER_HOME
 
                             $SONAR_SCANNER_HOME/bin/sonar-scanner \
@@ -82,20 +69,10 @@ pipeline {
             }
         }
         
-        stage('Trivy Docker Image Scan') {
-            steps {
-                sh '''
-                    mkdir -p trivy-report
-                    trivy image --severity CRITICAL,HIGH,MEDIUM --format template --template "@/var/lib/jenkins/html.tpl" -o trivy-report/vulnerability-report.html narasimhasai95/goalsapi:${GIT_COMMIT}
-                '''
-            }
-        }
-    
 
         stage('Build Docker Image') {
             steps {
                 sh '''
-                    cd backend/
                     docker build -t narasimhasai95/goalsapi:${GIT_COMMIT} .
                 '''
             }
@@ -117,7 +94,7 @@ pipeline {
                 }
             }
         }
-
+/*
         stage('Deploy to Kubernetes') {
             steps {
                 sh 'git clone -b main https://github.com/iam-narasimhasai/GoalsApp_Manifest'
@@ -138,7 +115,7 @@ pipeline {
             }
         }
 
-
+*/
 
     }
 
@@ -149,6 +126,16 @@ pipeline {
                     sh 'rm -rf GoalsApp_Manifest'
                 }
             }
+            
+            publishHTML([
+                allowMissing: true, 
+                alwaysLinkToLastBuild: true, 
+                keepAll: true, 
+                reportDir: 'backend/owasp-report', 
+                reportFiles: 'dependency-check-jenkins.html', 
+                reportName: 'Dependency HTML Report', 
+                useWrapperFileDirectly: true
+            ])
 
             junit allowEmptyResults: true, testResults: 'backend/test-results.xml'
 
@@ -161,15 +148,6 @@ pipeline {
                 reportName: 'Code Coverage HTML Report',
                 useWrapperFileDirectly: true
             ])
-            publishHTML([
-                allowMissing: true,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: '.',
-                reportFiles: 'zap_report.html',
-                reportName: 'OWASP ZAP DAST Report',
-                useWrapperFileDirectly: true
-            ])   
 
             publishHTML([
                 allowMissing: true,
@@ -180,6 +158,8 @@ pipeline {
                 reportName: 'Trivy Vulnerability Report',
                 useWrapperFileDirectly: true
             ])
+
         }
     }
+    
 }
