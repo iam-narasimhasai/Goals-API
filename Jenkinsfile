@@ -89,7 +89,7 @@ pipeline {
             }
         }
 
-        /*
+
         stage('Deploy to Kubernetes') {
             steps {
                 sh 'git clone -b main https://github.com/iam-narasimhasai/GoalsApp_Manifest'
@@ -109,7 +109,7 @@ pipeline {
                 }
             }
         }
-        */
+
 
         stage('Upload - AWS S3') {
             steps {
