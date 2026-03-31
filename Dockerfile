@@ -8,7 +8,7 @@ RUN npm ci --only=production
 
 COPY . .
 
-EXPOSE 3000 
+EXPOSE 3000 #its just doc purpose
 
 ENV MONGO_URL=mongodb+srv://dileep:secret32412@cluster0.61vv0.mongodb.net/course-goals?retryWrites=true&w=majority&appName=Cluster0
 
